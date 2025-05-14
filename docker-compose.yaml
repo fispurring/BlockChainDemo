@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  app:
+    container_name: blockchain_server
+    image: node:18.16.0
+    command: sh -c "npx knex migrate:latest && npm run start"
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: "root"
+      MYSQL_DATABASE: "block_chain"
+      REDIS_URL: redis://redis:6379
+      REDIS_ASSET_CACHE_TTL: 86400 # 1 day
+      ALCHEMY_API_KEY: "" #alchemy api key
+    ports:
+      - "3000:3000"
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: block_chain
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql_data:
